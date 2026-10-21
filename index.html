@@ -1,0 +1,1430 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jejak Si Titis: Dari Awan ke Lautan - Media Pembelajaran Siklus Air SD</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Canvas Confetti -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        titis: {
+                            light: '#7dd3fc',
+                            DEFAULT: '#0284c7',
+                            dark: '#0369a1',
+                            accent: '#38bdf8'
+                        },
+                        sun: '#fbbf24',
+                        cloud: '#f1f5f9',
+                        ground: '#15803d'
+                    },
+                    fontFamily: {
+                        sans: ['Fredoka', 'Quicksand', 'sans-serif'],
+                    },
+                    boxShadow: {
+                        'playful': '0 8px 0 0 rgba(2, 132, 199, 0.4)',
+                        'playful-pressed': '0 2px 0 0 rgba(2, 132, 199, 0.4)',
+                        'sun-glow': '0 0 40px rgba(251, 191, 36, 0.6)',
+                        'water-glow': '0 0 25px rgba(56, 189, 248, 0.6)'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Fredoka', 'Quicksand', sans-serif;
+            background: linear-gradient(180deg, #e0f2fe 0%, #f0f9ff 50%, #bae6fd 100%);
+            min-height: 100vh;
+            user-select: none;
+        }
+
+        /* Animated Background Clouds */
+        .bg-cloud {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 50px;
+            animation: floatCloud linear infinite;
+        }
+
+        @keyframes floatCloud {
+            0% { transform: translateX(-150px); }
+            100% { transform: translateX(100vw); }
+        }
+
+        /* Glossy Card Effect */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            border: 3px solid rgba(255, 255, 255, 0.8);
+            box-shadow: 0 20px 40px rgba(2, 132, 199, 0.12);
+        }
+
+        /* Custom Playful Button */
+        .btn-playful {
+            transition: all 0.1s ease;
+            box-shadow: 0 6px 0 0 currentColor;
+        }
+        .btn-playful:active {
+            transform: translateY(4px);
+            box-shadow: 0 2px 0 0 currentColor;
+        }
+
+        /* Pulse / Wiggle Animations */
+        @keyframes wiggle {
+            0%, 100% { transform: rotate(-3deg); }
+            50% { transform: rotate(3deg); }
+        }
+        .animate-wiggle {
+            animation: wiggle 2s infinite ease-in-out;
+        }
+
+        @keyframes pulseGlow {
+            0%, 100% { filter: drop-shadow(0 0 8px rgba(56, 189, 248, 0.6)); }
+            50% { filter: drop-shadow(0 0 18px rgba(56, 189, 248, 0.9)); }
+        }
+        .animate-glow {
+            animation: pulseGlow 2.5s infinite ease-in-out;
+        }
+
+        /* Speech Bubble Arrow */
+        .speech-bubble::after {
+            content: '';
+            position: absolute;
+            bottom: -14px;
+            left: 30px;
+            border-width: 14px 14px 0 0;
+            border-style: solid;
+            border-color: #ffffff transparent transparent transparent;
+            display: block;
+            width: 0;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #e0f2fe;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #38bdf8;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body class="relative overflow-x-hidden text-slate-800">
+
+    <!-- Background Clouds Decor -->
+    <div class="fixed inset-0 pointer-events-none z-0 overflow-hidden">
+        <div class="bg-cloud w-32 h-10 top-10 opacity-60" style="animation-duration: 35s; animation-delay: -5s;"></div>
+        <div class="bg-cloud w-48 h-14 top-24 opacity-80" style="animation-duration: 48s; animation-delay: -15s;"></div>
+        <div class="bg-cloud w-40 h-12 top-60 opacity-50" style="animation-duration: 40s; animation-delay: -25s;"></div>
+    </div>
+
+    <!-- MAIN APP CONTAINER -->
+    <div id="app" class="relative z-10 max-w-6xl mx-auto min-h-screen flex flex-col justify-between p-4 sm:p-6">
+        
+        <!-- HEADER / NAVIGATION -->
+        <header class="flex justify-between items-center glass-card rounded-3xl p-4 mb-6 shadow-lg">
+            <div class="flex items-center gap-3 cursor-pointer" onclick="navigateTo('home')">
+                <div class="w-12 h-12 bg-sky-400 rounded-2xl flex items-center justify-center text-white font-bold shadow-md transform hover:scale-105 transition">
+                    <canvas id="headerMascotCanvas" width="40" height="40"></canvas>
+                </div>
+                <div>
+                    <h1 class="text-xl sm:text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-sky-600 to-blue-700">
+                        Jejak Si Titis
+                    </h1>
+                    <p class="text-xs font-semibold text-sky-600">Siklus Air SD Kelas 5</p>
+                </div>
+            </div>
+
+            <!-- User Info / Role Toggle -->
+            <div id="userNav" class="flex items-center gap-3">
+                <div id="studentBadge" class="hidden sm:flex flex-col items-end">
+                    <span id="userNameDisplay" class="font-bold text-sky-800 text-sm">Siswa Sahabat Titis</span>
+                    <span id="userClassDisplay" class="text-xs text-sky-600 bg-sky-100 px-2 py-0.5 rounded-full">Kelas 5A</span>
+                </div>
+                <button id="logoutBtn" onclick="handleLogout()" class="hidden bg-rose-100 text-rose-600 hover:bg-rose-200 px-3 py-2 rounded-2xl font-bold text-xs sm:text-sm flex items-center gap-1.5 transition">
+                    <i data-lucide="log-out" class="w-4 h-4">="out"></i> Keluar
+                </button>
+            </div>
+        </header>
+
+        <!-- PAGE CONTAINER -->
+        <main class="flex-grow">
+
+            <!-- 1. LANDING & LOGIN PAGE -->
+            <section id="page-landing" class="block">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center py-6">
+                    <!-- Mascot Canvas Banner -->
+                    <div class="flex flex-col items-center text-center">
+                        <div class="relative w-72 h-72 sm:w-80 sm:h-80 my-2 animate-glow">
+                            <canvas id="heroMascotCanvas" width="320" height="320" class="w-full h-full cursor-pointer" onclick="triggerMascotAction('jump')"></canvas>
+                        </div>
+                        <p class="text-xs text-sky-600 font-semibold bg-white/80 px-4 py-1.5 rounded-full shadow-sm">
+                            💡 Klik Si Titis untuk melompat & menyapa!
+                        </p>
+                    </div>
+
+                    <!-- Role Card Selection & Login -->
+                    <div class="glass-card rounded-3xl p-6 sm:p-8 space-y-6">
+                        <div class="text-center md:text-left">
+                            <span class="bg-amber-100 text-amber-800 text-xs font-bold px-3 py-1 rounded-full">Petualangan Sains Seru! 🌧️</span>
+                            <h2 class="text-2xl sm:text-3xl font-extrabold text-sky-900 mt-2">Mari Belajar Siklus Air Bersama Si Titis!</h2>
+                            <p class="text-slate-600 text-sm mt-1">Pilih peranmu untuk memulai petualangan seru menyelusuri perjalanan air di bumi!</p>
+                        </div>
+
+                        <!-- Role Selector Tabs -->
+                        <div class="grid grid-cols-2 gap-3 bg-sky-100/70 p-1.5 rounded-2xl">
+                            <button id="tabStudent" onclick="switchRoleTab('student')" class="py-2.5 rounded-xl font-bold text-sm transition bg-white text-sky-700 shadow">
+                                👦🏻 Siswa
+                            </button>
+                            <button id="tabTeacher" onclick="switchRoleTab('teacher')" class="py-2.5 rounded-xl font-bold text-sm transition text-slate-600 hover:text-sky-700">
+                                👩‍🏫 Guru
+                            </button>
+                        </div>
+
+                        <!-- Student Login Form -->
+                        <form id="formStudent" onsubmit="handleStudentLogin(event)" class="space-y-4">
+                            <div>
+                                <label class="block text-xs font-bold text-sky-800 uppercase tracking-wide mb-1">Nama Lengkap Siswa</label>
+                                <input type="text" id="inputStudentName" required placeholder="Contoh: Budi Santoso" class="w-full px-4 py-3 rounded-2xl border-2 border-sky-200 focus:border-sky-500 focus:outline-none text-sm font-semibold">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-sky-800 uppercase tracking-wide mb-1">Kelas</label>
+                                <select id="inputStudentClass" class="w-full px-4 py-3 rounded-2xl border-2 border-sky-200 focus:border-sky-500 focus:outline-none text-sm font-semibold bg-white">
+                                    <option value="5A">Kelas 5A</option>
+                                    <option value="5B">Kelas 5B</option>
+                                    <option value="5C">Kelas 5C</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="w-full py-4 bg-sky-500 hover:bg-sky-600 text-white font-bold text-base rounded-2xl btn-playful text-sky-800 border-b-4 border-sky-700 flex items-center justify-center gap-2">
+                                <i data-lucide="play" class="fill-current w-5 h-5"></i> Mulai Petualangan!
+                            </button>
+                        </form>
+
+                        <!-- Teacher Login Form -->
+                        <form id="formTeacher" onsubmit="handleTeacherLogin(event)" class="hidden space-y-4">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-1">NIP / ID Guru</label>
+                                <input type="text" id="inputTeacherId" required placeholder="Masukkan NIP atau ID" class="w-full px-4 py-3 rounded-2xl border-2 border-slate-200 focus:border-indigo-500 focus:outline-none text-sm font-semibold">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wide mb-1">Kata Sandi</label>
+                                <input type="password" id="inputTeacherPass" required placeholder="••••••••" class="w-full px-4 py-3 rounded-2xl border-2 border-slate-200 focus:border-indigo-500 focus:outline-none text-sm font-semibold">
+                                <p class="text-[10px] text-slate-400 mt-1">*Sandi demo: <b>guru123</b></p>
+                            </div>
+                            <button type="submit" class="w-full py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-base rounded-2xl btn-playful text-indigo-900 border-b-4 border-indigo-800 flex items-center justify-center gap-2">
+                                <i data-lucide="layout-dashboard" class="w-5 h-5"></i> Masuk Dashboard Guru
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 2. STUDENT MAIN MENU & NAVIGATION -->
+            <section id="page-menu" class="hidden space-y-6">
+                <!-- Welcome Banner with Mascot -->
+                <div class="glass-card rounded-3xl p-6 relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-6">
+                    <div class="space-y-2 text-center md:text-left z-10">
+                        <span class="bg-sky-200 text-sky-800 text-xs font-bold px-3 py-1 rounded-full">Halo Sahabat Cilik! 👋</span>
+                        <h2 class="text-2xl sm:text-3xl font-extrabold text-sky-950">
+                            Selamat Datang, <span id="welcomeUserName" class="text-sky-600">Siswa</span>!
+                        </h2>
+                        <p class="text-slate-600 text-sm max-w-md">
+                            Si Titis siap membimbingmu memahami bagaimana air berpindah dari lautan ke awan dan kembali lagi ke bumi.
+                        </p>
+                    </div>
+                    <div class="w-48 h-48 relative flex-shrink-0">
+                        <canvas id="menuMascotCanvas" width="200" height="200" class="w-full h-full cursor-pointer" onclick="triggerMascotAction('wave')"></canvas>
+                    </div>
+                </div>
+
+                <!-- Learning Modules Menu Grid -->
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                    <!-- Module 1: Mascot-Led Animated Lesson -->
+                    <div onclick="navigateTo('lesson')" class="glass-card rounded-3xl p-6 hover:scale-105 transition cursor-pointer border-b-8 border-sky-400 group">
+                        <div class="w-16 h-16 bg-sky-100 rounded-2xl flex items-center justify-center text-sky-600 mb-4 group-hover:bg-sky-500 group-hover:text-white transition">
+                            <i data-lucide="book-open-check" class="w-8 h-8"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-sky-900 mb-1">1. Materi Si Titis</h3>
+                        <p class="text-xs text-slate-500 leading-relaxed">Animasi interaktif Si Titis langsung memperagakan & menjelaskan 4 Tahap Siklus Air.</p>
+                    </div>
+
+                    <!-- Module 2: Interactive Simulation -->
+                    <div onclick="navigateTo('simulation')" class="glass-card rounded-3xl p-6 hover:scale-105 transition cursor-pointer border-b-8 border-amber-400 group">
+                        <div class="w-16 h-16 bg-amber-100 rounded-2xl flex items-center justify-center text-amber-600 mb-4 group-hover:bg-amber-500 group-hover:text-white transition">
+                            <i data-lucide="flask-conical" class="w-8 h-8"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-amber-900 mb-1">2. Simulasi Panas</h3>
+                        <p class="text-xs text-slate-500 leading-relaxed">Kendalikan suhu matahari secara langsung dan amati proses laju penguapan!</p>
+                    </div>
+
+                    <!-- Module 3: Interactive Quiz -->
+                    <div onclick="navigateTo('quiz')" class="glass-card rounded-3xl p-6 hover:scale-105 transition cursor-pointer border-b-8 border-emerald-400 group">
+                        <div class="w-16 h-16 bg-emerald-100 rounded-2xl flex items-center justify-center text-emerald-600 mb-4 group-hover:bg-emerald-500 group-hover:text-white transition">
+                            <i data-lucide="trophy" class="w-8 h-8"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-emerald-900 mb-1">3. Kuis Petualangan</h3>
+                        <p class="text-xs text-slate-500 leading-relaxed">Uji pemahamanmu, kumpulkan bintang bercahaya dan dapatkan nilai terbaik!</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 3. MASCOT-LED INTERACTIVE LESSON MODULE -->
+            <section id="page-lesson" class="hidden space-y-6">
+                <!-- Top Navigation & Stage Indicator -->
+                <div class="flex items-center justify-between">
+                    <button onclick="navigateTo('menu')" class="bg-white/80 hover:bg-white text-sky-700 px-4 py-2 rounded-2xl font-bold text-sm flex items-center gap-2 shadow-sm">
+                        <i data-lucide="arrow-left" class="w-4 h-4"></i> Kembali ke Menu
+                    </button>
+                    <span id="lessonStepIndicator" class="bg-sky-500 text-white text-xs font-bold px-4 py-1.5 rounded-full shadow-sm">
+                        Tahap 1 dari 4
+                    </span>
+                </div>
+
+                <!-- Main Lesson Canvas & Mascot Presentation Container -->
+                <div class="glass-card rounded-3xl p-6 sm:p-8 grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
+                    
+                    <!-- Left: Si Titis Mascot Demonstrator (Canvas 2D Animated) -->
+                    <div class="md:col-span-5 flex flex-col items-center justify-center relative bg-gradient-to-b from-sky-100/50 to-blue-100/50 rounded-2xl p-4 border-2 border-sky-200">
+                        <!-- Speech Bubble Container -->
+                        <div id="mascotSpeechBubble" class="speech-bubble bg-white p-4 rounded-2xl shadow-md border-2 border-sky-300 w-full mb-3 relative animate-bounce-short">
+                            <p id="speechText" class="text-xs sm:text-sm font-bold text-sky-900 leading-snug">
+                                Halo! Namaku Si Titis. Mari kita pelajari bagaimana air berpindah tempat!
+                            </p>
+                        </div>
+                        <!-- Canvas Demonstrator Mascot -->
+                        <div class="w-64 h-64 relative">
+                            <canvas id="lessonMascotCanvas" width="260" height="260" class="w-full h-full cursor-pointer" onclick="triggerMascotAction('explain')"></canvas>
+                        </div>
+                        <span class="text-[11px] text-sky-600 font-semibold mt-1">💡 Klik Si Titis untuk melihat gerakan khususnya!</span>
+                    </div>
+
+                    <!-- Right: Interactive Stage Detail & Visual Simulation -->
+                    <div class="md:col-span-7 space-y-4">
+                        <div class="flex items-center gap-3">
+                            <span id="stageBadgeIcon" class="w-10 h-10 rounded-2xl bg-amber-100 text-amber-600 flex items-center justify-center font-bold text-xl">
+                                ☀️
+                            </span>
+                            <div>
+                                <h3 id="stageTitle" class="text-2xl font-extrabold text-sky-950">1. Evaporasi (Penguapan)</h3>
+                                <p id="stageSubTitle" class="text-xs text-sky-600 font-semibold">Proses air berubah menjadi uap karena panas matahari</p>
+                            </div>
+                        </div>
+
+                        <!-- Stage Visual Dynamic Display Canvas -->
+                        <div class="relative h-48 bg-gradient-to-b from-sky-200 to-sky-400 rounded-2xl overflow-hidden border-2 border-sky-300 shadow-inner flex items-center justify-center">
+                            <canvas id="stageVisualCanvas" width="400" height="180" class="w-full h-full"></canvas>
+                        </div>
+
+                        <!-- Detailed Text Content -->
+                        <div class="bg-white/80 p-4 rounded-2xl border border-sky-100 shadow-sm text-xs sm:text-sm text-slate-700 leading-relaxed">
+                            <p id="stageDescription">
+                                Matahari yang terik menyinari lautan, sungai, dan danau. Panas matahari membuat air berubah menjadi uap air yang tidak terlihat dan naik melayang ke udara!
+                            </p>
+                        </div>
+
+                        <!-- Stage Navigation Controls -->
+                        <div class="flex justify-between items-center pt-2">
+                            <button id="btnPrevStage" onclick="changeLessonStage(-1)" class="px-4 py-2.5 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-2xl font-bold text-xs flex items-center gap-1 transition">
+                                <i data-lucide="chevron-left" class="w-4 h-4"></i> Sebelum
+                            </button>
+
+                            <!-- Mini Step Buttons -->
+                            <div class="flex gap-1.5">
+                                <button onclick="setLessonStage(0)" class="stage-dot w-3 h-3 rounded-full bg-sky-500"></button>
+                                <button onclick="setLessonStage(1)" class="stage-dot w-3 h-3 rounded-full bg-slate-300"></button>
+                                <button onclick="setLessonStage(2)" class="stage-dot w-3 h-3 rounded-full bg-slate-300"></button>
+                                <button onclick="setLessonStage(3)" class="stage-dot w-3 h-3 rounded-full bg-slate-300"></button>
+                            </div>
+
+                            <button id="btnNextStage" onclick="changeLessonStage(1)" class="px-5 py-2.5 bg-sky-500 hover:bg-sky-600 text-white rounded-2xl font-bold text-xs flex items-center gap-1 btn-playful border-b-4 border-sky-700 transition">
+                                Lanjut <i data-lucide="chevron-right" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 4. INTERACTIVE SIMULATION MODULE (Panas Matahari) -->
+            <section id="page-simulation" class="hidden space-y-6">
+                <div class="flex items-center justify-between">
+                    <button onclick="navigateTo('menu')" class="bg-white/80 hover:bg-white text-sky-700 px-4 py-2 rounded-2xl font-bold text-sm flex items-center gap-2 shadow-sm">
+                        <i data-lucide="arrow-left" class="w-4 h-4"></i> Kembali ke Menu
+                    </button>
+                    <span class="bg-amber-500 text-white text-xs font-bold px-4 py-1.5 rounded-full shadow-sm">
+                        Simulasi Interaktif Panas
+                    </span>
+                </div>
+
+                <div class="glass-card rounded-3xl p-6 sm:p-8 space-y-6">
+                    <div class="text-center max-w-xl mx-auto">
+                        <h2 class="text-2xl font-extrabold text-sky-950">Laboratorium Siklus Air Si Titis 🧪</h2>
+                        <p class="text-xs sm:text-sm text-slate-600 mt-1">
+                            Geser pengatur suhu matahari di bawah ini untuk melihat seberapa cepat air menguap menjadi awan mendung!
+                        </p>
+                    </div>
+
+                    <!-- Main Canvas Simulation -->
+                    <div class="relative w-full h-72 sm:h-80 bg-gradient-to-b from-sky-300 via-sky-200 to-amber-100 rounded-3xl overflow-hidden border-4 border-white shadow-lg">
+                        <canvas id="simCanvas" class="w-full h-full"></canvas>
+                        
+                        <!-- Floating Live Readout Badge -->
+                        <div class="absolute top-4 right-4 bg-white/90 backdrop-blur px-4 py-2 rounded-2xl shadow border border-sky-200 text-right">
+                            <span class="text-[10px] uppercase tracking-wide font-bold text-slate-400 block">Suhu Matahari</span>
+                            <span id="simTempReadout" class="text-xl font-extrabold text-amber-500">30°C</span>
+                        </div>
+                    </div>
+
+                    <!-- Interactive Controls -->
+                    <div class="bg-sky-50/80 p-4 sm:p-6 rounded-2xl border border-sky-200 flex flex-col sm:flex-row items-center justify-between gap-4">
+                        <div class="w-full sm:w-2/3 space-y-2">
+                            <div class="flex justify-between items-center text-xs font-bold text-sky-900">
+                                <span>❄️ Dingin (10°C)</span>
+                                <span>☀️ Normal (30°C)</span>
+                                <span>🔥 Sangat Panas (50°C)</span>
+                            </div>
+                            <input type="range" id="simSlider" min="10" max="50" value="30" oninput="updateSimulationTemp(this.value)" class="w-full h-3 bg-sky-200 rounded-lg appearance-none cursor-pointer accent-amber-500">
+                        </div>
+
+                        <div class="flex items-center gap-3 w-full sm:w-auto">
+                            <button onclick="presetSimTemp(15)" class="flex-1 sm:flex-initial px-3 py-2 bg-sky-200 hover:bg-sky-300 text-sky-800 rounded-xl font-bold text-xs">
+                                Redup ☁️
+                            </button>
+                            <button onclick="presetSimTemp(48)" class="flex-1 sm:flex-initial px-3 py-2 bg-amber-400 hover:bg-amber-500 text-white rounded-xl font-bold text-xs btn-playful border-b-2 border-amber-600">
+                                Terik 🔥
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 5. INTERACTIVE QUIZ MODULE -->
+            <section id="page-quiz" class="hidden space-y-6">
+                <div class="flex items-center justify-between">
+                    <button onclick="navigateTo('menu')" class="bg-white/80 hover:bg-white text-sky-700 px-4 py-2 rounded-2xl font-bold text-sm flex items-center gap-2 shadow-sm">
+                        <i data-lucide="arrow-left" class="w-4 h-4"></i> Kembali ke Menu
+                    </button>
+                    <span id="quizProgressBadge" class="bg-emerald-500 text-white text-xs font-bold px-4 py-1.5 rounded-full shadow-sm">
+                        Soal 1 dari 5
+                    </span>
+                </div>
+
+                <!-- Active Quiz Card -->
+                <div id="quizActiveCard" class="glass-card rounded-3xl p-6 sm:p-8 max-w-2xl mx-auto space-y-6">
+                    <!-- Quiz Header & Mascot Cheering -->
+                    <div class="flex items-center gap-4 border-b border-slate-100 pb-4">
+                        <div class="w-20 h-20 flex-shrink-0">
+                            <canvas id="quizMascotCanvas" width="90" height="90" class="w-full h-full"></canvas>
+                        </div>
+                        <div>
+                            <span class="text-xs font-bold text-emerald-600 bg-emerald-100 px-2.5 py-0.5 rounded-full">Kuis Siklus Air</span>
+                            <h3 id="quizQuestionText" class="text-lg sm:text-xl font-bold text-sky-950 mt-1">
+                                Pertanyaan kuis akan muncul di sini...
+                            </h3>
+                        </div>
+                    </div>
+
+                    <!-- Multiple Choice Options -->
+                    <div id="quizOptionsContainer" class="space-y-3">
+                        <!-- Dynamic options generated via JS -->
+                    </div>
+
+                    <!-- Instant Feedback Box -->
+                    <div id="quizFeedbackBox" class="hidden p-4 rounded-2xl border-2 text-sm font-bold flex items-center gap-3">
+                        <span id="feedbackIcon" class="text-2xl">🎉</span>
+                        <p id="feedbackText">Jawaban kamu benar sekali!</p>
+                    </div>
+
+                    <!-- Next Question Action Button -->
+                    <button id="btnNextQuestion" onclick="submitQuizAnswer()" disabled class="w-full py-3.5 bg-emerald-500 disabled:opacity-50 hover:bg-emerald-600 text-white font-bold text-sm rounded-2xl btn-playful border-b-4 border-emerald-700 transition">
+                        Jawab & Lanjut <i data-lucide="arrow-right" class="inline w-4 h-4 ml-1"></i>
+                    </button>
+                </div>
+
+                <!-- Quiz Completion Score Result Screen -->
+                <div id="quizResultCard" class="hidden glass-card rounded-3xl p-8 max-w-lg mx-auto text-center space-y-6">
+                    <div class="w-32 h-32 mx-auto">
+                        <canvas id="quizResultMascotCanvas" width="140" height="140" class="w-full h-full"></canvas>
+                    </div>
+                    <div>
+                        <span class="bg-amber-100 text-amber-800 text-xs font-bold px-3 py-1 rounded-full">Petualangan Selesai! 🎉</span>
+                        <h2 class="text-3xl font-extrabold text-sky-950 mt-2">Nilai Kuis Kamu</h2>
+                        <div id="finalScoreDisplay" class="text-6xl font-black text-emerald-500 my-2">100</div>
+                        <p id="finalScoreMsg" class="text-xs sm:text-sm text-slate-600">
+                            Luar biasa! Kamu adalah Sahabat Air sejati yang sangat cerdas!
+                        </p>
+                    </div>
+                    <div class="flex gap-3">
+                        <button onclick="restartQuiz()" class="flex-1 py-3 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold text-xs rounded-2xl">
+                            Ulangi Kuis 🔄
+                        </button>
+                        <button onclick="navigateTo('menu')" class="flex-1 py-3 bg-sky-500 hover:bg-sky-600 text-white font-bold text-xs rounded-2xl btn-playful border-b-4 border-sky-700">
+                            Selesai & Menu 🏠
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 6. TEACHER DASHBOARD MODULE -->
+            <section id="page-teacher" class="hidden space-y-6">
+                <!-- Dashboard Header -->
+                <div class="glass-card rounded-3xl p-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                    <div>
+                        <span class="bg-indigo-100 text-indigo-700 text-xs font-bold px-3 py-1 rounded-full">Panel Guru 👩‍🏫</span>
+                        <h2 class="text-2xl font-extrabold text-indigo-950 mt-1">Rekapitulasi Nilai Siswa</h2>
+                        <p class="text-xs text-slate-500">Pantau perkembangan dan pemahaman siswa dalam materi Siklus Air SD Kelas 5.</p>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button onclick="exportTeacherData()" class="px-4 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-2xl font-bold text-xs flex items-center gap-1.5 shadow-sm">
+                            <i data-lucide="download" class="w-4 h-4"></i> Cetak / Export
+                        </button>
+                        <button onclick="resetTeacherData()" class="px-3 py-2.5 bg-rose-100 hover:bg-rose-200 text-rose-600 rounded-2xl font-bold text-xs flex items-center gap-1">
+                            <i data-lucide="trash-2" class="w-4 h-4"></i> Reset
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Class Filter & Quick Analytics Cards -->
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-3">
+                        <div class="w-12 h-12 bg-sky-100 text-sky-600 rounded-xl flex items-center justify-center font-bold">
+                            <i data-lucide="users" class="w-6 h-6"></i>
+                        </div>
+                        <div>
+                            <span class="text-[11px] text-slate-400 font-bold uppercase">Total Siswa</span>
+                            <p id="teacherTotalStudents" class="text-xl font-black text-sky-900">0</p>
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-3">
+                        <div class="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-xl flex items-center justify-center font-bold">
+                            <i data-lucide="award" class="w-6 h-6"></i>
+                        </div>
+                        <div>
+                            <span class="text-[11px] text-slate-400 font-bold uppercase">Rata-Rata Nilai</span>
+                            <p id="teacherAvgScore" class="text-xl font-black text-emerald-600">0</p>
+                        </div>
+                    </div>
+
+                    <!-- Filter Selector -->
+                    <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
+                        <div>
+                            <span class="text-[11px] text-slate-400 font-bold uppercase">Filter Kelas</span>
+                            <select id="teacherClassFilter" onchange="renderTeacherTable()" class="block w-full font-bold text-sky-900 bg-transparent focus:outline-none cursor-pointer">
+                                <option value="ALL">Semua Kelas</option>
+                                <option value="5A">Kelas 5A</option>
+                                <option value="5B">Kelas 5B</option>
+                                <option value="5C">Kelas 5C</option>
+                            </select>
+                        </div>
+                        <i data-lucide="filter" class="w-5 h-5 text-slate-400"></i>
+                    </div>
+                </div>
+
+                <!-- Scores Table -->
+                <div class="glass-card rounded-3xl p-6 overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-sm">
+                            <thead>
+                                <tr class="border-b border-slate-200 text-slate-400 text-xs uppercase tracking-wider">
+                                    <th class="pb-3 px-2">No</th>
+                                    <th class="pb-3 px-2">Nama Siswa</th>
+                                    <th class="pb-3 px-2">Kelas</th>
+                                    <th class="pb-3 px-2">Tanggal Kuis</th>
+                                    <th class="pb-3 px-2 text-right">Nilai</th>
+                                </tr>
+                            </thead>
+                            <tbody id="teacherTableBody" class="divide-y divide-slate-100 font-semibold text-slate-700">
+                                <!-- Dynamic Rows -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+
+        <!-- FOOTER -->
+        <footer class="mt-8 text-center text-xs font-semibold text-sky-700/80 space-y-1">
+            <p>© 2026 Media Pembelajaran Interaktif SD - Jejak Si Titis</p>
+            <p class="text-[10px] text-sky-600">Dikembangkan untuk Pembelajaran Sains Kurikulum Merdeka Kelas 5</p>
+        </footer>
+    </div>
+
+    <!-- WELCOME GREETING MODAL BY SI TITIS -->
+    <div id="introModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 opacity-0 pointer-events-none transition-opacity duration-300">
+        <div class="bg-white rounded-3xl p-6 sm:p-8 max-w-sm w-full text-center space-y-4 shadow-2xl transform scale-90 transition-transform duration-300" id="introModalBox">
+            <div class="w-36 h-36 mx-auto relative">
+                <canvas id="modalMascotCanvas" width="160" height="160" class="w-full h-full"></canvas>
+            </div>
+            <div>
+                <h3 class="text-2xl font-extrabold text-sky-950">Halo Teman! 💧</h3>
+                <p class="text-xs sm:text-sm text-slate-600 mt-2 leading-relaxed">
+                    Aku <span class="font-bold text-sky-600">Si Titis</span>! Aku akan mendampingimu petualangan dari lautan luas sampai naik ke langit tinggi!
+                </p>
+            </div>
+            <button onclick="closeIntroModal()" class="w-full py-3.5 bg-sky-500 hover:bg-sky-600 text-white font-bold text-sm rounded-2xl btn-playful border-b-4 border-sky-700">
+                Ayo Mulai Petualangan! 🚀
+            </button>
+        </div>
+    </div>
+
+    <!-- APPLICATION LOGIC & ANIMATION ENGINE -->
+    <script>
+        /* ==========================================================================
+           1. GLOBAL STATE & USER DATA
+           ========================================================================== */
+        let currentUser = {
+            name: '',
+            role: '', // 'student' or 'teacher'
+            class: '5A'
+        };
+
+        // Lesson Stages Data (Mascot-led Presentation)
+        const lessonStages = [
+            {
+                title: "1. Evaporasi (Penguapan)",
+                subtitle: "Air Berubah Menjadi Uap Air",
+                icon: "☀️",
+                speech: "Matahari yang panas menyinari permukaan air laut. Panas ini membuat air laut menguap dan terbang tinggi ke langit!",
+                desc: "Sinar matahari memanaskan air di laut, sungai, dan danau. Air tersebut kemudian menguap dan berubah menjadi wujud uap air yang naik ke atmosfer.",
+                canvasType: "evaporation"
+            },
+            {
+                title: "2. Kondensasi (Pengembunan)",
+                subtitle: "Uap Air Berkumpul Menjadi Awan",
+                icon: "☁️",
+                speech: "Di atas langit yang dingin, uap-uap air saling berkumpul dan berubah menjadi titik-titik air kecil yang membentuk awan!",
+                desc: "Saat uap air naik ke tempat yang lebih tinggi dan dingin, uap tersebut mengembun membentuk titik-titik air kecil. Titik air ini menyatu membentuk awan.",
+                canvasType: "condensation"
+            },
+            {
+                title: "3. Presipitasi (Hujan)",
+                subtitle: "Awan Berat Menjatuhkan Titik Air",
+                icon: "🌧️",
+                speech: "Awan makin lama makin tebal dan berat. Titik-titik air akhirnya jatuh kembali ke bumi sebagai air hujan!",
+                desc: "Ketika titik-titik air di dalam awan sudah sangat berat dan banyak, awan tidak sanggup menahannya lagi, sehingga jatuh sebagai hujan.",
+                canvasType: "precipitation"
+            },
+            {
+                title: "4. Infiltrasi (Penyerapan)",
+                subtitle: "Air Meresap Kembali ke Tanah & Laut",
+                icon: "🌱",
+                speech: "Air hujan yang jatuh akan meresap ke dalam tanah dan mengalir kembali menuju sungai dan laut. Siklus pun terulang!",
+                desc: "Sebagian air hujan meresap ke dalam tanah (infiltrasi) dan sebagian lagi mengalir di permukaan bumi kembali ke laut, siap untuk menguap lagi.",
+                canvasType: "infiltration"
+            }
+        ];
+
+        let currentLessonIndex = 0;
+
+        // Quiz Questions Data
+        const quizQuestions = [
+            {
+                question: "Proses perubahan air menjadi uap air karena panas matahari disebut...",
+                options: ["Evaporasi", "Kondensasi", "Presipitasi", "Infiltrasi"],
+                correct: 0,
+                explanation: "Hebat! Panas matahari mengubah air menjadi uap yang disebut Evaporasi."
+            },
+            {
+                question: "Ketika uap air di langit yang dingin berkumpul menjadi awan, proses ini dinamakan...",
+                options: ["Evaporasi", "Kondensasi", "Presipitasi", "Transpirasi"],
+                correct: 1,
+                explanation: "Tepat sekali! Pengembunan uap air menjadi awan disebut Kondensasi."
+            },
+            {
+                question: "Peristiwa jatuhnya titik-titik air dari awan ke bumi lebih dikenal dengan...",
+                options: ["Angin Topan", "Hujan (Presipitasi)", "Penguapan", "Pencairan"],
+                correct: 1,
+                explanation: "Pintar! Air yang jatuh dari awan adalah Hujan atau Presipitasi."
+            },
+            {
+                question: "Proses meresapnya air hujan ke dalam pori-pori tanah disebut...",
+                options: ["Infiltrasi", "Evaporasi", "Erosi", "Kondensasi"],
+                correct: 0,
+                explanation: "Benar! Air yang masuk dan disimpan dalam tanah mengalami Infiltrasi."
+            },
+            {
+                question: "Mengapa jumlah air di bumi secara keseluruhan relatif tetap?",
+                options: [
+                    "Karena air tidak pernah dipakai",
+                    "Karena air terus mengalami Siklus Air",
+                    "Karena selalu diciptakan air baru dari lautan",
+                    "Karena hujan turun setiap hari tanpa henti"
+                ],
+                correct: 1,
+                explanation: "Luar biasa! Siklus air menjaga ketersediaan air di bumi secara berulang!"
+            }
+        ];
+
+        let currentQuizIndex = 0;
+        let userSelectedOption = null;
+        let quizScore = 0;
+
+        /* ==========================================================================
+           2. MASCOT CANVAS DRAWING ENGINE (SI TITIS WITH LIMBS & GLOSSY 3D LOOK)
+           ========================================================================== */
+        // Render Si Titis Droplet Mascot onto any Canvas Context with dynamic animations
+        function drawTitisMascot(ctx, width, height, state = {}) {
+            const time = state.time || 0;
+            const action = state.action || 'idle'; // 'idle', 'wave', 'jump', 'explain'
+            
+            ctx.clearRect(0, 0, width, height);
+
+            const cx = width / 2;
+            let cy = height / 2 + 10;
+            
+            // Jump Animation offset
+            if (action === 'jump') {
+                cy -= Math.abs(Math.sin(time * 8)) * 25;
+            } else if (action === 'idle') {
+                cy += Math.sin(time * 3) * 3; // Breathing bounce
+            }
+
+            // Drop Shadow on Floor
+            ctx.beginPath();
+            ctx.ellipse(cx, height - 20, 35 - (height/2 + 10 - cy)/2, 8, 0, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(2, 132, 199, 0.2)';
+            ctx.fill();
+
+            // --- LEGS & FEET ---
+            ctx.lineWidth = 6;
+            ctx.strokeStyle = '#0284c7';
+            ctx.lineCap = 'round';
+
+            // Left Leg
+            let lFootY = cy + 50;
+            let rFootY = cy + 50;
+            if (action === 'jump') {
+                lFootY -= 8;
+                rFootY -= 8;
+            }
+
+            ctx.beginPath();
+            ctx.moveTo(cx - 18, cy + 30);
+            ctx.lineTo(cx - 22, lFootY);
+            ctx.stroke();
+
+            // Right Leg
+            ctx.beginPath();
+            ctx.moveTo(cx + 18, cy + 30);
+            ctx.lineTo(cx + 22, rFootY);
+            ctx.stroke();
+
+            // Shoes / Feet (Cute Oval)
+            ctx.fillStyle = '#0284c7';
+            ctx.beginPath();
+            ctx.ellipse(cx - 25, lFootY + 2, 9, 5, 0, 0, Math.PI * 2);
+            ctx.ellipse(cx + 25, rFootY + 2, 9, 5, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            // --- MAIN WATER DROP BODY (GLOSSY 3D GRADIENT) ---
+            const dropRadius = 45;
+            ctx.save();
+            ctx.beginPath();
+            // Custom Water Drop Path: Top tip, curved bottom
+            ctx.moveTo(cx, cy - dropRadius - 20);
+            ctx.bezierCurveTo(cx + dropRadius + 10, cy - 10, cx + dropRadius, cy + dropRadius, cx, cy + dropRadius);
+            ctx.bezierCurveTo(cx - dropRadius, cy + dropRadius, cx - dropRadius - 10, cy - 10, cx, cy - dropRadius - 20);
+            ctx.closePath();
+
+            // Body Gradient (Glossy Sky-Blue to Ocean-Blue)
+            const bodyGrad = ctx.createRadialGradient(cx - 15, cy - 15, 5, cx, cy, dropRadius + 15);
+            bodyGrad.addColorStop(0, '#7dd3fc');
+            bodyGrad.addColorStop(0.6, '#38bdf8');
+            bodyGrad.addColorStop(1, '#0284c7');
+            ctx.fillStyle = bodyGrad;
+            ctx.fill();
+
+            ctx.lineWidth = 3;
+            ctx.strokeStyle = '#0369a1';
+            ctx.stroke();
+
+            // Glossy 3D Highlight Curve
+            ctx.beginPath();
+            ctx.ellipse(cx - 18, cy - 18, 12, 6, Math.PI / 4, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+            ctx.fill();
+
+            ctx.beginPath();
+            ctx.arc(cx - 10, cy - 28, 4, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+            ctx.fill();
+
+            // --- ARMS & HANDS ---
+            ctx.lineWidth = 5;
+            ctx.strokeStyle = '#0284c7';
+
+            // Left Arm
+            ctx.beginPath();
+            ctx.moveTo(cx - 38, cy + 10);
+            if (action === 'wave') {
+                const waveAngle = Math.sin(time * 10) * 0.4;
+                ctx.lineTo(cx - 55, cy - 15 + waveAngle * 10);
+            } else {
+                ctx.lineTo(cx - 52, cy + 20);
+            }
+            ctx.stroke();
+
+            // Right Arm
+            ctx.beginPath();
+            ctx.moveTo(cx + 38, cy + 10);
+            if (action === 'explain') {
+                ctx.lineTo(cx + 58, cy - 5 + Math.sin(time * 6) * 8);
+            } else {
+                ctx.lineTo(cx + 52, cy + 20);
+            }
+            ctx.stroke();
+
+            // Hands (Cute Circles)
+            ctx.fillStyle = '#38bdf8';
+            ctx.beginPath();
+            if (action === 'wave') {
+                ctx.arc(cx - 57, cy - 18, 7, 0, Math.PI * 2);
+            } else {
+                ctx.arc(cx - 54, cy + 22, 6, 0, Math.PI * 2);
+            }
+            ctx.arc(cx + 54, cy + 22, 6, 0, Math.PI * 2);
+            ctx.fill();
+
+            // --- EYES (Big Glossy Sparkly Eyes) ---
+            const blink = Math.sin(time * 2) > 0.96; // Occasional blink
+            const eyeY = cy - 2;
+
+            if (blink) {
+                // Closed Eyes (Happy Arc)
+                ctx.lineWidth = 3;
+                ctx.strokeStyle = '#0f172a';
+                ctx.beginPath();
+                ctx.arc(cx - 15, eyeY, 6, Math.PI, 0);
+                ctx.arc(cx + 15, eyeY, 6, Math.PI, 0);
+                ctx.stroke();
+            } else {
+                // Open Eyes
+                ctx.fillStyle = '#0f172a';
+                ctx.beginPath();
+                ctx.arc(cx - 15, eyeY, 8, 0, Math.PI * 2);
+                ctx.arc(cx + 15, eyeY, 8, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Pupil Catchlights
+                ctx.fillStyle = '#ffffff';
+                ctx.beginPath();
+                ctx.arc(cx - 17, eyeY - 3, 3, 0, Math.PI * 2);
+                ctx.arc(cx + 13, eyeY - 3, 3, 0, Math.PI * 2);
+                ctx.arc(cx - 13, eyeY + 2, 1.5, 0, Math.PI * 2);
+                ctx.arc(cx + 17, eyeY + 2, 1.5, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            // Cheeks (Rosy Red)
+            ctx.fillStyle = 'rgba(251, 113, 133, 0.5)';
+            ctx.beginPath();
+            ctx.arc(cx - 24, cy + 8, 6, 0, Math.PI * 2);
+            ctx.arc(cx + 24, cy + 8, 6, 0, Math.PI * 2);
+            ctx.fill();
+
+            // --- SMILE MOUTH ---
+            ctx.lineWidth = 3.5;
+            ctx.strokeStyle = '#0f172a';
+            ctx.beginPath();
+            ctx.arc(cx, cy + 8, 10, 0.1 * Math.PI, 0.9 * Math.PI);
+            ctx.stroke();
+
+            // Open mouth tongue detail
+            ctx.fillStyle = '#f43f5e';
+            ctx.beginPath();
+            ctx.arc(cx, cy + 13, 5, 0, Math.PI);
+            ctx.fill();
+
+            ctx.restore();
+        }
+
+        /* ==========================================================================
+           3. CANVAS ANIMATION LOOPS & CONTROLLER
+           ========================================================================== */
+        let animTime = 0;
+        let activeMascotActions = {
+            hero: 'idle',
+            menu: 'wave',
+            lesson: 'explain',
+            quiz: 'idle',
+            modal: 'jump'
+        };
+
+        function triggerMascotAction(action) {
+            activeMascotActions.hero = action;
+            activeMascotActions.menu = action;
+            activeMascotActions.lesson = action;
+            setTimeout(() => {
+                activeMascotActions.hero = 'idle';
+                activeMascotActions.menu = 'wave';
+                activeMascotActions.lesson = 'explain';
+            }, 2500);
+        }
+
+        function globalAnimationLoop() {
+            animTime += 0.03;
+
+            // 1. Header Canvas
+            const hCanvas = document.getElementById('headerMascotCanvas');
+            if (hCanvas) {
+                const ctx = hCanvas.getContext('2d');
+                drawTitisMascot(ctx, 40, 40, { time: animTime, action: 'idle' });
+            }
+
+            // 2. Hero Landing Canvas
+            const heroCanvas = document.getElementById('heroMascotCanvas');
+            if (heroCanvas && isElementVisible(heroCanvas)) {
+                const ctx = heroCanvas.getContext('2d');
+                drawTitisMascot(ctx, 320, 320, { time: animTime, action: activeMascotActions.hero });
+            }
+
+            // 3. Menu Welcome Canvas
+            const menuCanvas = document.getElementById('menuMascotCanvas');
+            if (menuCanvas && isElementVisible(menuCanvas)) {
+                const ctx = menuCanvas.getContext('2d');
+                drawTitisMascot(ctx, 200, 200, { time: animTime, action: activeMascotActions.menu });
+            }
+
+            // 4. Lesson Mascot Canvas
+            const lessonCanvas = document.getElementById('lessonMascotCanvas');
+            if (lessonCanvas && isElementVisible(lessonCanvas)) {
+                const ctx = lessonCanvas.getContext('2d');
+                drawTitisMascot(ctx, 260, 260, { time: animTime, action: activeMascotActions.lesson });
+            }
+
+            // 5. Stage Visual Dynamic Simulation Canvas
+            renderLessonStageVisual(animTime);
+
+            // 6. Simulation Module Loop
+            renderPanasSimulation(animTime);
+
+            // 7. Quiz Mascot Canvas
+            const qCanvas = document.getElementById('quizMascotCanvas');
+            if (qCanvas && isElementVisible(qCanvas)) {
+                drawTitisMascot(qCanvas.getContext('2d'), 90, 90, { time: animTime, action: 'wave' });
+            }
+
+            // 8. Quiz Result Mascot Canvas
+            const qrCanvas = document.getElementById('quizResultMascotCanvas');
+            if (qrCanvas && isElementVisible(qrCanvas)) {
+                drawTitisMascot(qrCanvas.getContext('2d'), 140, 140, { time: animTime, action: 'jump' });
+            }
+
+            // 9. Intro Modal Mascot Canvas
+            const mCanvas = document.getElementById('modalMascotCanvas');
+            if (mCanvas && isElementVisible(mCanvas)) {
+                drawTitisMascot(mCanvas.getContext('2d'), 160, 160, { time: animTime, action: 'jump' });
+            }
+
+            requestAnimationFrame(globalAnimationLoop);
+        }
+
+        function isElementVisible(el) {
+            return el && el.offsetParent !== null;
+        }
+
+        /* ==========================================================================
+           4. LESSON STAGE VISUAL CANVAS RENDERER
+           ========================================================================== */
+        function renderLessonStageVisual(t) {
+            const canvas = document.getElementById('stageVisualCanvas');
+            if (!canvas || !isElementVisible(canvas)) return;
+            const ctx = canvas.getContext('2d');
+            const w = canvas.width;
+            const h = canvas.height;
+
+            ctx.clearRect(0, 0, w, h);
+            const stage = lessonStages[currentLessonIndex].canvasType;
+
+            if (stage === 'evaporation') {
+                // Ocean Base
+                ctx.fillStyle = '#0284c7';
+                ctx.fillRect(0, h - 40, w, 40);
+                
+                // Sun Smiling
+                ctx.fillStyle = '#fbbf24';
+                ctx.beginPath();
+                ctx.arc(60, 40, 25, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Rising Vapor Particles
+                for (let i = 0; i < 12; i++) {
+                    const vx = 100 + (i * 25);
+                    const vy = (h - 50) - ((t * 40 + i * 20) % (h - 70));
+                    ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+                    ctx.beginPath();
+                    ctx.arc(vx + Math.sin(t * 3 + i) * 6, vy, 4 + (i % 3), 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            } else if (stage === 'condensation') {
+                // Fluffy Cloud Formation
+                ctx.fillStyle = '#f8fafc';
+                ctx.beginPath();
+                ctx.arc(w/2 - 40, h/2, 35, 0, Math.PI * 2);
+                ctx.arc(w/2 + 30, h/2, 40, 0, Math.PI * 2);
+                ctx.arc(w/2, h/2 - 20, 45, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Droplet particles condensing inside cloud
+                for (let i = 0; i < 8; i++) {
+                    ctx.fillStyle = '#38bdf8';
+                    ctx.beginPath();
+                    ctx.arc(w/2 - 30 + i * 10, h/2 - 10 + Math.sin(t * 4 + i) * 8, 3, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            } else if (stage === 'precipitation') {
+                // Dark Rain Cloud
+                ctx.fillStyle = '#64748b';
+                ctx.beginPath();
+                ctx.arc(w/2 - 40, 40, 35, 0, Math.PI * 2);
+                ctx.arc(w/2 + 30, 40, 40, 0, Math.PI * 2);
+                ctx.arc(w/2, 25, 45, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Rain drops falling down
+                ctx.strokeStyle = '#38bdf8';
+                ctx.lineWidth = 2.5;
+                for (let i = 0; i < 20; i++) {
+                    const rx = (i * 20) % w;
+                    const ry = 70 + ((t * 150 + i * 25) % (h - 80));
+                    ctx.beginPath();
+                    ctx.moveTo(rx, ry);
+                    ctx.lineTo(rx - 3, ry + 12);
+                    ctx.stroke();
+                }
+            } else if (stage === 'infiltration') {
+                // Ground Layers
+                ctx.fillStyle = '#15803d'; // Grass
+                ctx.fillRect(0, 30, w, 15);
+                ctx.fillStyle = '#78350f'; // Dirt
+                ctx.fillRect(0, 45, w, h - 45);
+
+                // Underground Water Absorbing Bubbles
+                for (let i = 0; i < 15; i++) {
+                    const gx = (i * 28 + 15) % w;
+                    const gy = 60 + ((t * 20 + i * 15) % (h - 70));
+                    ctx.fillStyle = '#38bdf8';
+                    ctx.beginPath();
+                    ctx.arc(gx, gy, 4, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
+        }
+
+        /* ==========================================================================
+           5. INTERACTIVE SUN TEMPERATURE SIMULATION
+           ========================================================================== */
+        let simTemp = 30;
+
+        function updateSimulationTemp(val) {
+            simTemp = parseInt(val);
+            document.getElementById('simTempReadout').innerText = `${simTemp}°C`;
+        }
+
+        function presetSimTemp(val) {
+            document.getElementById('simSlider').value = val;
+            updateSimulationTemp(val);
+        }
+
+        function renderPanasSimulation(t) {
+            const canvas = document.getElementById('simCanvas');
+            if (!canvas || !isElementVisible(canvas)) return;
+            const ctx = canvas.getContext('2d');
+            const w = canvas.width = canvas.offsetWidth;
+            const h = canvas.height = canvas.offsetHeight;
+
+            ctx.clearRect(0, 0, w, h);
+
+            // Sun Radius & Intensity Glow based on Temp
+            const sunGlow = (simTemp - 10) / 40; // 0 to 1
+            const sunR = 30 + sunGlow * 20;
+
+            // Sun
+            ctx.fillStyle = '#fbbf24';
+            ctx.beginPath();
+            ctx.arc(70, 70, sunR, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Sun Rays
+            ctx.strokeStyle = 'rgba(251, 191, 36, 0.6)';
+            ctx.lineWidth = 3 + sunGlow * 3;
+            for (let a = 0; a < Math.PI * 2; a += Math.PI / 6) {
+                const rx1 = 70 + Math.cos(a + t) * (sunR + 5);
+                const ry1 = 70 + Math.sin(a + t) * (sunR + 5);
+                const rx2 = 70 + Math.cos(a + t) * (sunR + 15 + sunGlow * 10);
+                const ry2 = 70 + Math.sin(a + t) * (sunR + 15 + sunGlow * 10);
+                ctx.beginPath();
+                ctx.moveTo(rx1, ry1);
+                ctx.lineTo(rx2, ry2);
+                ctx.stroke();
+            }
+
+            // Water Body at Bottom
+            ctx.fillStyle = '#0284c7';
+            ctx.fillRect(0, h - 50, w, 50);
+
+            // Vapor Evaporation Particles (Speed depends on Temp)
+            const particleCount = Math.floor(10 + sunGlow * 40);
+            const speed = 20 + sunGlow * 80;
+
+            for (let i = 0; i < particleCount; i++) {
+                const px = (i * (w / particleCount) + Math.sin(t + i) * 10) % w;
+                const py = (h - 60) - ((t * speed + i * 30) % (h - 110));
+                
+                ctx.fillStyle = `rgba(255, 255, 255, ${0.4 + sunGlow * 0.5})`;
+                ctx.beginPath();
+                ctx.arc(px, py, 3 + sunGlow * 4, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            // Cloud forming at top right
+            const cloudDarkness = Math.floor(255 - sunGlow * 80);
+            ctx.fillStyle = `rgb(${cloudDarkness}, ${cloudDarkness}, ${cloudDarkness})`;
+            ctx.beginPath();
+            ctx.arc(w - 100, 70, 35 + sunGlow * 15, 0, Math.PI * 2);
+            ctx.arc(w - 60, 70, 40 + sunGlow * 15, 0, Math.PI * 2);
+            ctx.arc(w - 80, 50, 45 + sunGlow * 15, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        /* ==========================================================================
+           6. NAVIGATION & PAGE ROUTING (SPA)
+           ========================================================================== */
+        function navigateTo(pageId) {
+            const pages = ['landing', 'menu', 'lesson', 'simulation', 'quiz', 'teacher'];
+            pages.forEach(p => {
+                const el = document.getElementById(`page-${p}`);
+                if (el) el.classList.add('hidden');
+            });
+
+            const target = document.getElementById(`page-${pageId}`);
+            if (target) target.classList.remove('hidden');
+
+            // Scroll to top
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+
+            // Initialize specific page states
+            if (pageId === 'lesson') renderLessonStage();
+            if (pageId === 'quiz') renderQuizQuestion();
+            if (pageId === 'teacher') renderTeacherTable();
+            if (pageId === 'menu') triggerMascotAction('wave');
+        }
+
+        function switchRoleTab(role) {
+            const tabStudent = document.getElementById('tabStudent');
+            const tabTeacher = document.getElementById('tabTeacher');
+            const formStudent = document.getElementById('formStudent');
+            const formTeacher = document.getElementById('formTeacher');
+
+            if (role === 'student') {
+                tabStudent.className = "py-2.5 rounded-xl font-bold text-sm transition bg-white text-sky-700 shadow";
+                tabTeacher.className = "py-2.5 rounded-xl font-bold text-sm transition text-slate-600 hover:text-sky-700";
+                formStudent.classList.remove('hidden');
+                formTeacher.classList.add('hidden');
+            } else {
+                tabTeacher.className = "py-2.5 rounded-xl font-bold text-sm transition bg-white text-indigo-700 shadow";
+                tabStudent.className = "py-2.5 rounded-xl font-bold text-sm transition text-slate-600 hover:text-sky-700";
+                formTeacher.classList.remove('hidden');
+                formStudent.classList.add('hidden');
+            }
+        }
+
+        /* ==========================================================================
+           7. AUTHENTICATION & LOGIN LOGIC
+           ========================================================================== */
+        function handleStudentLogin(e) {
+            e.preventDefault();
+            const name = document.getElementById('inputStudentName').value.trim();
+            const cls = document.getElementById('inputStudentClass').value;
+
+            if (!name) return;
+
+            currentUser = { name, role: 'student', class: cls };
+            
+            // Update UI
+            document.getElementById('userNameDisplay').innerText = name;
+            document.getElementById('userClassDisplay').innerText = `Kelas ${cls}`;
+            document.getElementById('welcomeUserName').innerText = name;
+            document.getElementById('studentBadge').classList.remove('hidden');
+            document.getElementById('studentBadge').classList.add('flex');
+            document.getElementById('logoutBtn').classList.remove('hidden');
+
+            navigateTo('menu');
+            showIntroModal();
+        }
+
+        function handleTeacherLogin(e) {
+            e.preventDefault();
+            const pass = document.getElementById('inputTeacherPass').value;
+            if (pass === 'guru123') {
+                currentUser = { name: 'Guru Pengajar', role: 'teacher', class: 'ALL' };
+                document.getElementById('studentBadge').classList.add('hidden');
+                document.getElementById('logoutBtn').classList.remove('hidden');
+                navigateTo('teacher');
+            } else {
+                alert('Kata sandi guru salah! Coba pakai: guru123');
+            }
+        }
+
+        function handleLogout() {
+            currentUser = { name: '', role: '', class: '5A' };
+            document.getElementById('studentBadge').classList.add('hidden');
+            document.getElementById('logoutBtn').classList.add('hidden');
+            navigateTo('landing');
+        }
+
+        /* ==========================================================================
+           8. LESSON PRESENTATION CONTROLLER
+           ========================================================================== */
+        function setLessonStage(idx) {
+            currentLessonIndex = idx;
+            renderLessonStage();
+        }
+
+        function changeLessonStage(dir) {
+            currentLessonIndex += dir;
+            if (currentLessonIndex < 0) currentLessonIndex = 0;
+            if (currentLessonIndex >= lessonStages.length) currentLessonIndex = lessonStages.length - 1;
+            renderLessonStage();
+        }
+
+        function renderLessonStage() {
+            const stage = lessonStages[currentLessonIndex];
+            document.getElementById('stageTitle').innerText = stage.title;
+            document.getElementById('stageSubTitle').innerText = stage.subtitle;
+            document.getElementById('stageBadgeIcon').innerText = stage.icon;
+            document.getElementById('speechText').innerText = stage.speech;
+            document.getElementById('stageDescription').innerText = stage.desc;
+            document.getElementById('lessonStepIndicator').innerText = `Tahap ${currentLessonIndex + 1} dari ${lessonStages.length}`;
+
+            // Buttons state
+            document.getElementById('btnPrevStage').disabled = (currentLessonIndex === 0);
+            document.getElementById('btnNextStage').innerText = (currentLessonIndex === lessonStages.length - 1) ? 'Selesai & Ke Menu' : 'Lanjut Tahap';
+
+            // Stage dots indicator
+            const dots = document.querySelectorAll('.stage-dot');
+            dots.forEach((dot, idx) => {
+                dot.className = (idx === currentLessonIndex) ? 'stage-dot w-3 h-3 rounded-full bg-sky-500' : 'stage-dot w-3 h-3 rounded-full bg-slate-300';
+            });
+
+            triggerMascotAction('explain');
+        }
+
+        /* ==========================================================================
+           9. QUIZ LOGIC & RECORDING
+           ========================================================================== */
+        function renderQuizQuestion() {
+            document.getElementById('quizActiveCard').classList.remove('hidden');
+            document.getElementById('quizResultCard').classList.add('hidden');
+            document.getElementById('quizFeedbackBox').classList.add('hidden');
+
+            const q = quizQuestions[currentQuizIndex];
+            document.getElementById('quizQuestionText').innerText = q.question;
+            document.getElementById('quizProgressBadge').innerText = `Soal ${currentQuizIndex + 1} dari ${quizQuestions.length}`;
+
+            const container = document.getElementById('quizOptionsContainer');
+            container.innerHTML = '';
+            userSelectedOption = null;
+
+            document.getElementById('btnNextQuestion').disabled = true;
+
+            q.options.forEach((opt, idx) => {
+                const btn = document.createElement('button');
+                btn.className = "w-full p-4 rounded-2xl border-2 border-slate-200 hover:border-sky-400 bg-white text-left font-bold text-sm text-slate-700 transition flex items-center justify-between";
+                btn.innerHTML = `<span>${opt}</span> <div class="w-5 h-5 rounded-full border-2 border-slate-300 flex items-center justify-center text-xs"></div>`;
+                btn.onclick = () => selectQuizOption(idx, btn);
+                container.appendChild(btn);
+            });
+        }
+
+        function selectQuizOption(idx, btnElement) {
+            userSelectedOption = idx;
+            const container = document.getElementById('quizOptionsContainer');
+            Array.from(container.children).forEach(child => {
+                child.className = "w-full p-4 rounded-2xl border-2 border-slate-200 hover:border-sky-400 bg-white text-left font-bold text-sm text-slate-700 transition flex items-center justify-between";
+            });
+
+            btnElement.className = "w-full p-4 rounded-2xl border-2 border-sky-500 bg-sky-50 text-left font-bold text-sm text-sky-900 transition flex items-center justify-between shadow-sm";
+            document.getElementById('btnNextQuestion').disabled = false;
+        }
+
+        function submitQuizAnswer() {
+            if (userSelectedOption === null) return;
+
+            const q = quizQuestions[currentQuizIndex];
+            const isCorrect = (userSelectedOption === q.correct);
+
+            if (isCorrect) quizScore += 20;
+
+            // Feedback box
+            const feedbackBox = document.getElementById('quizFeedbackBox');
+            feedbackBox.classList.remove('hidden');
+            if (isCorrect) {
+                feedbackBox.className = "p-4 rounded-2xl border-2 border-emerald-300 bg-emerald-50 text-emerald-900 text-xs sm:text-sm font-bold flex items-center gap-3";
+                document.getElementById('feedbackIcon').innerText = "🎉";
+                document.getElementById('feedbackText').innerText = q.explanation;
+                confetti({ particleCount: 40, spread: 60, origin: { y: 0.7 } });
+            } else {
+                feedbackBox.className = "p-4 rounded-2xl border-2 border-rose-300 bg-rose-50 text-rose-900 text-xs sm:text-sm font-bold flex items-center gap-3";
+                document.getElementById('feedbackIcon').innerText = "💡";
+                document.getElementById('feedbackText').innerText = `Kurang tepat! ${q.explanation}`;
+            }
+
+            document.getElementById('btnNextQuestion').disabled = true;
+
+            setTimeout(() => {
+                currentQuizIndex++;
+                if (currentQuizIndex < quizQuestions.length) {
+                    renderQuizQuestion();
+                } else {
+                    finishQuiz();
+                }
+            }, 2500);
+        }
+
+        function finishQuiz() {
+            document.getElementById('quizActiveCard').classList.add('hidden');
+            document.getElementById('quizResultCard').classList.remove('hidden');
+            document.getElementById('finalScoreDisplay').innerText = quizScore;
+
+            // Save Score to LocalStorage
+            saveQuizResult(currentUser.name, currentUser.class, quizScore);
+
+            // Confetti
+            confetti({ particleCount: 100, spread: 80, origin: { y: 0.6 } });
+        }
+
+        function restartQuiz() {
+            currentQuizIndex = 0;
+            quizScore = 0;
+            renderQuizQuestion();
+        }
+
+        /* ==========================================================================
+           10. TEACHER DATA & LOCALSTORAGE RECAPITULATION
+           ========================================================================== */
+        function saveQuizResult(name, cls, score) {
+            const existing = JSON.parse(localStorage.getItem('titis_quiz_results') || '[]');
+            existing.push({
+                name: name || 'Siswa Tanpa Nama',
+                class: cls || '5A',
+                score: score,
+                date: new Date().toLocaleDateString('id-ID')
+            });
+            localStorage.setItem('titis_quiz_results', JSON.stringify(existing));
+        }
+
+        function renderTeacherTable() {
+            const raw = JSON.parse(localStorage.getItem('titis_quiz_results') || '[]');
+            const filterClass = document.getElementById('teacherClassFilter').value;
+
+            let filtered = raw;
+            if (filterClass !== 'ALL') {
+                filtered = raw.filter(item => item.class === filterClass);
+            }
+
+            const tbody = document.getElementById('teacherTableBody');
+            tbody.innerHTML = '';
+
+            document.getElementById('teacherTotalStudents').innerText = filtered.length;
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="text-center py-6 text-slate-400">Belum ada data nilai siswa.</td></tr>`;
+                document.getElementById('teacherAvgScore').innerText = '0';
+                return;
+            }
+
+            let totalScore = 0;
+            filtered.forEach((item, idx) => {
+                totalScore += item.score;
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-sky-50/50 transition";
+                tr.innerHTML = `
+                    <td class="py-3 px-2">${idx + 1}</td>
+                    <td class="py-3 px-2 font-bold text-sky-950">${item.name}</td>
+                    <td class="py-3 px-2"><span class="bg-sky-100 text-sky-700 px-2 py-0.5 rounded-full text-xs">${item.class}</span></td>
+                    <td class="py-3 px-2 text-xs text-slate-400">${item.date}</td>
+                    <td class="py-3 px-2 text-right font-extrabold text-emerald-600">${item.score}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            const avg = Math.round(totalScore / filtered.length);
+            document.getElementById('teacherAvgScore').innerText = avg;
+        }
+
+        function resetTeacherData() {
+            if (confirm('Apakah Anda yakin ingin menghapus semua rekapitulasi nilai siswa?')) {
+                localStorage.removeItem('titis_quiz_results');
+                renderTeacherTable();
+            }
+        }
+
+        function exportTeacherData() {
+            window.print();
+        }
+
+        /* ==========================================================================
+           11. MODAL CONTROLLER
+           ========================================================================== */
+        function showIntroModal() {
+            const modal = document.getElementById('introModal');
+            const box = document.getElementById('introModalBox');
+            modal.classList.remove('pointer-events-none');
+            modal.classList.remove('opacity-0');
+            box.classList.remove('scale-90');
+            box.classList.add('scale-100');
+        }
+
+        function closeIntroModal() {
+            const modal = document.getElementById('introModal');
+            const box = document.getElementById('introModalBox');
+            modal.classList.add('opacity-0');
+            box.classList.remove('scale-100');
+            box.classList.add('scale-90');
+            setTimeout(() => {
+                modal.classList.add('pointer-events-none');
+            }, 300);
+        }
+
+        /* ==========================================================================
+           12. INITIALIZATION ON WINDOW LOAD
+           ========================================================================== */
+        window.onload = function() {
+            // Render Lucide Icons
+            if (window.lucide) {
+                lucide.createIcons();
+            }
+
+            // Seed dummy data for teacher view if empty
+            if (!localStorage.getItem('titis_quiz_results')) {
+                const seedData = [
+                    { name: 'Budi Santoso', class: '5A', score: 100, date: '21/10/2026' },
+                    { name: 'Siti Rahma', class: '5A', score: 80, date: '21/10/2026' },
+                    { name: 'Ahmad Dahlan', class: '5B', score: 100, date: '20/10/2026' },
+                    { name: 'Dewi Lestari', class: '5C', score: 60, date: '20/10/2026' }
+                ];
+                localStorage.setItem('titis_quiz_results', JSON.stringify(seedData));
+            }
+
+            // Start Animation Engine
+            globalAnimationLoop();
+        };
+    </script>
+</body>
+</html>
